@@ -5,18 +5,12 @@
             <url>src/interfaces/Principal.java</url>
             <bookmark id="1">
                 <name/>
-                <line>155</line>
+                <line>154</line>
                 <key/>
             </bookmark>
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/home/awelo/NetBeansProjects/Nomina/src/interfaces/Historial.java</file>
-            <file>file:/home/awelo/NetBeansProjects/Nomina/src/interfaces/Login.java</file>
-            <file>file:/home/awelo/NetBeansProjects/Nomina/src/entidades/LoginEntidad.java</file>
-            <file>file:/home/awelo/NetBeansProjects/Nomina/src/conexion/Conexion.java</file>
-            <file>file:/home/awelo/NetBeansProjects/Nomina/src/interfaces/Principal.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

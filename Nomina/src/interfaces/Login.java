@@ -6,27 +6,118 @@
 package interfaces;
 
 import conexion.Conexion;
+import conexion.Control;
 import entidades.LoginEntidad;
+import entidades.Sesion;
+import java.awt.BorderLayout;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.SQLException; 
+import java.util.Calendar;
+import java.util.Date;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 /**
  *
  * @author awelo
  */
 public class Login extends javax.swing.JFrame {
 
+    private Calendar calendario;
+    private int anio, mes, dia, diaSem, hora, min, seg;
+    private boolean permiso=false;
+    private Conexion con= new Conexion();
     /**
      * Creates new form Login
      */
     public Login() {
         initComponents();
         setearPestanias();
-    }
-    
-    public void setearPestanias(){
+        iniciarReloj();
         
-        tbpnPestania.setEnabledAt(1, false);
+    }
+    /*
+        Metodo para determinar si la pestaña de LogOut debe de estar activada o no
+        en caso de que esta este activada llama al metodo para llenar los usuarios activos
+    */
+    public void setearPestanias(){
+        if(!getLogon()){
+            tbpnPestania.setEnabledAt(1, false);
+        }else{
+            tbpnPestania.setEnabledAt(1, true);
+            getLogon();
+        }
+    }
+    /*
+        Metodo para llenar los usuarios activos
+    */
+    private boolean getLogon(){
+        ResultSet obtenido = con.darLogon();
+        boolean hay=false;
+        try{
+            String[] datos = new String[4];
+            JPanel panel= new JPanel();
+            BorderLayout capa= new BorderLayout();
+            cappnCapa.setLayout(capa);
+            while(obtenido.next()){
+                hay=true;
+                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+                datos[0]=obtenido.getString(1);
+                datos[1]=obtenido.getString(2)+ " "+obtenido.getString(3);
+                PnlLogeado logeado= new PnlLogeado(this);
+                logeado.getMaximumSize();
+                logeado.setValores(datos);
+                panel.add(logeado, BorderLayout.CENTER);
+            }
+            cappnCapa.add(panel);
+        } catch(SQLException e){
+            
+        }
+        return hay;
+    }
+    /*
+        Metodo para hacer funcionar el reloj digital
+    */
+    public void iniciarReloj(){
+        calendario= new java.util.GregorianCalendar();
+        seg= calendario.get(calendario.SECOND);
+        javax.swing.Timer timer = new javax.swing.Timer(1000, new java.awt.event.ActionListener(){
+            @Override
+           public void actionPerformed(java.awt.event.ActionEvent evt){
+               Date actual= new Date();
+               calendario.setTime(actual);
+               anio= calendario.get(calendario.YEAR);
+               mes= calendario.get(calendario.MONTH);
+               dia=calendario.get(calendario.DAY_OF_MONTH);
+               hora= calendario.get(calendario.HOUR_OF_DAY);
+               min= calendario.get(calendario.MINUTE);
+               seg= calendario.get(calendario.SECOND);
+               diaSem=calendario.get(calendario.DAY_OF_WEEK);
+               String[] semana=new String[]{"Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sábado"};
+               String[] month= new String[]{"Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Div"};
+               String hour = String.format("%02d : %02d : %02d", hora, min, seg);
+               String date= String.format(semana[diaSem-1]+" %02d de "+month[mes]+" de %04d", dia, anio);
+               lblReloj.setText(hour);
+               lblFecha.setText(date);
+           }
+        });
+        
+        timer.start();
+    }
+    /*
+        Método para validar que en el usuario no pueda insertar textos copiados y pegados
+    */
+    private boolean validarUsuario(String cadena){
+        boolean pasa= true;
+        int x=0;
+        while( x<cadena.length() & pasa){
+            if(!Character.isDigit(cadena.charAt(x))){
+                pasa=false;
+            }
+            x++;
+        }
+        return pasa;
     }
 
     /**
@@ -39,21 +130,41 @@ public class Login extends javax.swing.JFrame {
     private void initComponents() {
 
         tbpnPestania = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
+        pnlLogIn = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         txtUsuario = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         pswrPassword = new javax.swing.JPasswordField();
         btnEntrar = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
+        lblReloj = new javax.swing.JLabel();
+        lblFecha = new javax.swing.JLabel();
+        pnlLogOut = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        cappnCapa = new javax.swing.JLayeredPane();
+        txtBuscar = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setText("Usuario:");
 
+        txtUsuario.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtUsuarioKeyTyped(evt);
+            }
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtUsuarioKeyPressed(evt);
+            }
+        });
+
         jLabel2.setText("Password:");
+
+        pswrPassword.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                pswrPasswordKeyTyped(evt);
+            }
+        });
 
         btnEntrar.setText("Entrar");
         btnEntrar.addActionListener(new java.awt.event.ActionListener() {
@@ -62,31 +173,38 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(140, 140, 140)
-                        .addComponent(jLabel2))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(105, 105, 105)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pswrPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(134, 134, 134)
+        javax.swing.GroupLayout pnlLogInLayout = new javax.swing.GroupLayout(pnlLogIn);
+        pnlLogIn.setLayout(pnlLogInLayout);
+        pnlLogInLayout.setHorizontalGroup(
+            pnlLogInLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlLogInLayout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 91, Short.MAX_VALUE)
+                .addComponent(lblFecha, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(40, 40, 40))
+            .addGroup(pnlLogInLayout.createSequentialGroup()
+                .addGroup(pnlLogInLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlLogInLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(pswrPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(pnlLogInLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlLogInLayout.createSequentialGroup()
+                                .addGap(152, 152, 152)
+                                .addComponent(txtUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(pnlLogInLayout.createSequentialGroup()
+                                .addGap(183, 183, 183)
+                                .addComponent(jLabel2))))
+                    .addGroup(pnlLogInLayout.createSequentialGroup()
+                        .addGap(178, 178, 178)
                         .addComponent(btnEntrar))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(143, 143, 143)
+                    .addGroup(pnlLogInLayout.createSequentialGroup()
+                        .addGap(187, 187, 187)
                         .addComponent(jLabel1)))
-                .addContainerGap(155, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        pnlLogInLayout.setVerticalGroup(
+            pnlLogInLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlLogInLayout.createSequentialGroup()
                 .addGap(60, 60, 60)
                 .addComponent(jLabel1)
                 .addGap(18, 18, 18)
@@ -97,53 +215,85 @@ public class Login extends javax.swing.JFrame {
                 .addComponent(pswrPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnEntrar)
-                .addContainerGap(62, Short.MAX_VALUE))
-        );
-
-        tbpnPestania.addTab("Login", jPanel1);
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
-
-            }
-        ));
-        jScrollPane1.setViewportView(jTable1);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
+                .addGroup(pnlLogInLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblReloj, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblFecha, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 68, Short.MAX_VALUE))
+
+        tbpnPestania.addTab("Login", pnlLogIn);
+
+        javax.swing.GroupLayout cappnCapaLayout = new javax.swing.GroupLayout(cappnCapa);
+        cappnCapa.setLayout(cappnCapaLayout);
+        cappnCapaLayout.setHorizontalGroup(
+            cappnCapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 473, Short.MAX_VALUE)
+        );
+        cappnCapaLayout.setVerticalGroup(
+            cappnCapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 213, Short.MAX_VALUE)
         );
 
-        tbpnPestania.addTab("Log Out", jPanel2);
+        jScrollPane1.setViewportView(cappnCapa);
+
+        jButton1.setText("Buscar");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setText("Buscar:");
+
+        javax.swing.GroupLayout pnlLogOutLayout = new javax.swing.GroupLayout(pnlLogOut);
+        pnlLogOut.setLayout(pnlLogOutLayout);
+        pnlLogOutLayout.setHorizontalGroup(
+            pnlLogOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlLogOutLayout.createSequentialGroup()
+                .addGap(33, 33, 33)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(52, 52, 52)
+                .addComponent(jButton1)
+                .addContainerGap(97, Short.MAX_VALUE))
+            .addGroup(pnlLogOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlLogOutLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
+                    .addContainerGap()))
+        );
+        pnlLogOutLayout.setVerticalGroup(
+            pnlLogOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlLogOutLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlLogOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1)
+                    .addComponent(jLabel3))
+                .addContainerGap(244, Short.MAX_VALUE))
+            .addGroup(pnlLogOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlLogOutLayout.createSequentialGroup()
+                    .addContainerGap(52, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap()))
+        );
+
+        tbpnPestania.addTab("Log Out", pnlLogOut);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tbpnPestania, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(tbpnPestania, javax.swing.GroupLayout.DEFAULT_SIZE, 454, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(tbpnPestania, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(tbpnPestania, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -151,27 +301,176 @@ public class Login extends javax.swing.JFrame {
 
     private void btnEntrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntrarActionPerformed
         // TODO add your handling code here:
-        Conexion con = new Conexion();
+        Control controla = new Control();
         LoginEntidad entidad = new LoginEntidad();
-        if(txtUsuario.getText().equals("") || pswrPassword.getText().equals("")){
+        if(txtUsuario.getText().equals("")  || pswrPassword.getText().equals("")){
             JOptionPane.showMessageDialog(rootPane, "Llena todos los campos");
-        }else{
+        }else if(!validarUsuario(txtUsuario.getText())){
+            JOptionPane.showMessageDialog(rootPane, "Ingresa un usuario Valido");
+            txtUsuario.setText("");
+            pswrPassword.setText("");
+        } else {
             entidad.setUsuario((int)Integer.parseInt(txtUsuario.getText()));
             entidad.setPassword(pswrPassword.getText());
-            
-            ResultSet obtener=con.consultaLogin(entidad);
-            
+            ResultSet obtener=con.consultaLogin(entidad);               
             try{
-                if(!obtener.next()){
-                    JOptionPane.showMessageDialog(rootPane, "Datos Incorrectos");
-                } else {
-                  JOptionPane.showMessageDialog(rootPane, "BIENVENIDO "+obtener.getString(1)+" "+obtener.getString(2)+" "+obtener.getString(3));
+                int acceso=0;
+                String password=null, nombre = null, apepat=null, apemat=null;
+                int empleado=0, activo=0;
+                while(obtener.next()){
+                    password=obtener.getString(1);
+                    activo=obtener.getInt(2);
+                    empleado=obtener.getInt(3);
+                    acceso=obtener.getInt(4);
+                    
+                }
+                if(password.equals(entidad.getPassword()) & activo==1){
+                    
+                    if(acceso>-1){
+                        
+                        if(acceso==1){
+                            Sesion sesion= new Sesion();
+                                sesion.setFecha(new java.sql.Date(anio,mes,dia));
+                                sesion.setHoraInicio(new java.sql.Time(hora, min, seg));
+                                sesion.setSemana(1);
+                                sesion.setUser(empleado);
+                                
+                                if(controla.sesion(sesion)>0){
+                                
+                                    if(JOptionPane.showConfirmDialog(this, "¿Desar Abrir la interfaz de Administrador?")==0){
+                                    ResultSet obt=con.loginAprobado(empleado);
+                                    while(obt.next()){
+                                        nombre=obt.getString(1);
+                                        apepat=obt.getString(2);
+                                        apemat=obt.getString(3);
+                                    }
+                                    txtUsuario.setText("");
+                                    pswrPassword.setText("");
+                                    this.dispose();
+                                    Login login= new Login();
+                                    login.setLocationRelativeTo(null);
+                                    login.setVisible(true);
+                                
+                                    JOptionPane.showMessageDialog(rootPane, "Bienvenido "+nombre+" "+apepat+" "+apemat);
+                                
+                                    Principal pantalla = new Principal();
+                                    pantalla.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                                    pantalla.setDefaultCloseOperation(HIDE_ON_CLOSE);
+                                    pantalla.setVisible(true);
+                                
+                                    } else{
+                                        ResultSet obt=con.loginAprobado(empleado);
+                                        while(obt.next()){
+                                            nombre=obt.getString(1);
+                                            apepat=obt.getString(2);
+                                            apemat=obt.getString(3);
+                                        }
+                                        txtUsuario.setText("");
+                                        pswrPassword.setText("");
+                                        this.dispose();
+                                        Login login= new Login();
+                                        login.setLocationRelativeTo(null);
+                                        login.setVisible(true);
+                                        JOptionPane.showMessageDialog(rootPane, "Bienvenido "+nombre+" "+apepat+" "+apemat);
+                                    }
+                                }
+                        } else if(acceso==0){
+                            Sesion sesion= new Sesion();
+                            java.util.Date data= calendario.getTime();
+                            sesion.setFecha(new java.sql.Date(mes, min, dia));
+                            sesion.setHoraInicio(new java.sql.Time(hora,min,seg));
+                            sesion.setSemana(1);
+                            sesion.setUser(empleado);
+                                
+                            if(controla.sesion(sesion)>0){
+                                
+                                ResultSet obt=con.loginAprobado(empleado);
+                                while(obt.next()){
+                                    nombre=obt.getString(1);
+                                    apepat=obt.getString(2);
+                                    apemat=obt.getString(3);
+                                }
+                                txtUsuario.setText("");
+                                pswrPassword.setText("");
+                                this.dispose();
+                                Login login= new Login();
+                                login.setLocationRelativeTo(null);
+                                login.setVisible(true);
+                                JOptionPane.showMessageDialog(rootPane, "Bienvenido "+nombre+" "+apepat+" "+apemat);
+                            }
+                        }
+                    } else{
+                        Sesion sesion= new Sesion();
+                        java.util.Date data= calendario.getTime();
+                        sesion.setFecha(new java.sql.Date(mes, min, dia));
+                        sesion.setHoraInicio(new java.sql.Time(hora, min, seg));
+                        sesion.setSemana(1);
+                        sesion.setUser(empleado);
+                                
+                        if(controla.sesion(sesion)==0){
+                                
+                            txtUsuario.setText("");
+                            pswrPassword.setText("");
+                            this.dispose();
+                            Login login= new Login();
+                            login.setLocationRelativeTo(null);
+                            login.setVisible(true);
+                            JOptionPane.showMessageDialog(rootPane, "Datos Incorrectos");
+                        }
+                    }
                 }
             }catch(SQLException e){
                 JOptionPane.showMessageDialog(rootPane, "Error en la conexion "+e);
             }
+
         }
     }//GEN-LAST:event_btnEntrarActionPerformed
+
+    private void txtUsuarioKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtUsuarioKeyTyped
+        // TODO add your handling code here:
+        char tecla =evt.getKeyChar();
+        if(!Character.isDigit(tecla)){
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtUsuarioKeyTyped
+
+    private void pswrPasswordKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_pswrPasswordKeyTyped
+        // TODO add your handling code here:
+    }//GEN-LAST:event_pswrPasswordKeyTyped
+
+    private void txtUsuarioKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtUsuarioKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtUsuarioKeyPressed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        if(txtBuscar.getText().equals("")){
+            JOptionPane.showMessageDialog(rootPane, "Ingresa un codigo para buscar");
+        }else if(validarUsuario(txtBuscar.getText())){
+            ResultSet obtenido=con.darLogonFilt(Integer.parseInt(txtBuscar.getText()));
+            try{
+                String[] datos = new String[4];
+                JPanel panel= new JPanel();
+                BorderLayout capa= new BorderLayout();
+                cappnCapa.setLayout(capa);
+                while(obtenido.next()){
+                    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+                    datos[0]=obtenido.getString(1);
+                    datos[1]=obtenido.getString(2)+ " "+obtenido.getString(3);
+                    PnlLogeado logeado= new PnlLogeado(this);
+                    logeado.getMaximumSize();
+                    logeado.setValores(datos);
+                    panel.add(logeado, BorderLayout.CENTER);
+                }
+                cappnCapa.add(panel);
+            } catch(SQLException e){
+                JOptionPane.showMessageDialog(rootPane, "Se ha Producido un error "+ e);
+            }
+        }else{
+            JOptionPane.showMessageDialog(rootPane, "Ingresa un Usuario Válido");
+            txtBuscar.setText("");
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -210,14 +509,33 @@ public class Login extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntrar;
+    private javax.swing.JLayeredPane cappnCapa;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JLabel lblFecha;
+    private javax.swing.JLabel lblReloj;
+    private javax.swing.JPanel pnlLogIn;
+    private javax.swing.JPanel pnlLogOut;
     private javax.swing.JPasswordField pswrPassword;
     private javax.swing.JTabbedPane tbpnPestania;
+    private javax.swing.JTextField txtBuscar;
     private javax.swing.JTextField txtUsuario;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * @return the permiso
+     */
+    public boolean isPermiso() {
+        return permiso;
+    }
+
+    /**
+     * @param permiso the permiso to set
+     */
+    public void setPermiso(boolean permiso) {
+        this.permiso = permiso;
+    }
 }

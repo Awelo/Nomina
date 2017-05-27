@@ -6,13 +6,9 @@
 package interfaces;
 import conexion.Conexion;
 import java.awt.BorderLayout;
-import java.awt.List;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import javax.swing.GroupLayout;
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 /**
@@ -38,20 +34,18 @@ public class Principal extends javax.swing.JFrame {
             BorderLayout capa = new BorderLayout();
             cappPanel.setLayout(capa);
             while(consulta.next()){
+                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
                 datos[0]=consulta.getString(1);
                 datos[1]=consulta.getString(2) +" " + consulta.getString(3) + " " + consulta.getString(4);
                 datos[2]=consulta.getString(5);
                 datos[3]=consulta.getString(6);
-                Usuario user = new Usuario();
+                Usuario user = new Usuario(this);
                 user.getMaximumSize();
                 user.setDatos(datos);
                 panel.add(user, BorderLayout.CENTER);
                 
             }
             cappPanel.add(panel);
-            
-            
-            
             
         
         }catch (SQLException e){
@@ -165,6 +159,9 @@ public class Principal extends javax.swing.JFrame {
 
     private void btnEmpleadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEmpleadosActionPerformed
         // TODO add your handling code here:
+        Empleados empleado = new Empleados();
+        empleado.setLocationRelativeTo(null);
+        empleado.setVisible(true);
     }//GEN-LAST:event_btnEmpleadosActionPerformed
 
     /**

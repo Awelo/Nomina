@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8d14d8e4-3f7a-43f8-814e-b96048874fb4">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[SELECT
+     empleado.`idEmpleado` AS empleado_idEmpleado,
+     empleado.`nombreEmpleado` AS empleado_nombreEmpleado,
+     empleado.`apepat` AS empleado_apepat,
+     empleado.`apemat` AS empleado_apemat,
+     empleado.`telefono` AS empleado_telefono,
+     empleado.`correo` AS empleado_correo,
+     empleado.`cargo_idCargo` AS empleado_cargo_idCargo,
+     empleado.`foto` AS empleado_foto
+FROM
+     `empleado` empleado]]>
+	</queryString>
+	<field name="empleado_idEmpleado" class="java.lang.Integer"/>
+	<field name="empleado_nombreEmpleado" class="java.lang.String"/>
+	<field name="empleado_apepat" class="java.lang.String"/>
+	<field name="empleado_apemat" class="java.lang.String"/>
+	<field name="empleado_telefono" class="java.lang.String"/>
+	<field name="empleado_correo" class="java.lang.String"/>
+	<field name="empleado_cargo_idCargo" class="java.lang.Integer"/>
+	<field name="empleado_foto" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<textField>
+				<reportElement x="16" y="17" width="41" height="20" uuid="b648a740-918e-45fc-abf2-73b69eb90225"/>
+				<textFieldExpression><![CDATA[$F{empleado_idEmpleado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="78" y="17" width="100" height="20" uuid="6af8d1d5-c3d5-414e-831f-3a2e659dd239"/>
+				<textFieldExpression><![CDATA[$F{empleado_nombreEmpleado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="199" y="17" width="100" height="20" uuid="53f3cc67-56c1-483e-aad5-fa7404fc0e0e"/>
+				<textFieldExpression><![CDATA[$F{empleado_apepat}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

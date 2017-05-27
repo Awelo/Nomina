@@ -5,10 +5,6 @@
  */
 package principal;
 import interfaces.*;
-import java.awt.BorderLayout;
-import java.awt.Frame;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 /**
  *
  * @author awelo
@@ -20,10 +16,10 @@ public class Nomina {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        
-        Principal pantalla = new Principal();
-        pantalla.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        pantalla.setVisible(true);
+   
+        Login inicio= new Login();
+        inicio.setLocationRelativeTo(null);
+        inicio.setVisible(true);
     }
     
 }

@@ -5,10 +5,15 @@
  */
 package interfaces;
 
+import java.awt.Image;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.plaf.IconUIResource;
+import net.sf.jasperreports.engine.JRException;
+import reportes.Reporte;
 
 /**
  *
@@ -16,10 +21,12 @@ import javax.swing.plaf.IconUIResource;
  */
 public class Usuario extends javax.swing.JPanel {
 
+    javax.swing.JFrame frame;
     /**
      * Creates new form Usuario
      */
-    public Usuario() {
+    public Usuario(javax.swing.JFrame frame) {
+        this.frame = frame;
         initComponents();
     }
     
@@ -28,6 +35,8 @@ public class Usuario extends javax.swing.JPanel {
         lblNombre.setText(datos[1]);
         URL url = this.getClass().getResource(datos[2]);
         ImageIcon icon = new ImageIcon(url);
+        lblImagen.setSize(80, 100);
+        Icon icono = new ImageIcon(icon.getImage().getScaledInstance(lblImagen.getWidth(), lblImagen.getHeight(), lblImagen.getWidth()));
         lblImagen.setIcon(icon);
         lblCargo.setText(datos[3]);
     }
@@ -49,12 +58,19 @@ public class Usuario extends javax.swing.JPanel {
         lblCodigo = new javax.swing.JLabel();
 
         jButton1.setText("Pagar");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         lblNombre.setText("Nombre:");
 
         lblCargo.setText("Cargo:");
 
         lblSueldo.setText("Sueldo:");
+
+        lblImagen.setPreferredSize(new java.awt.Dimension(80, 100));
 
         lblCodigo.setText("Codigo:");
 
@@ -75,7 +91,7 @@ public class Usuario extends javax.swing.JPanel {
                             .addComponent(lblCargo))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 259, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(jButton1)
                                 .addGap(8, 8, 8)))
@@ -94,12 +110,22 @@ public class Usuario extends javax.swing.JPanel {
                         .addComponent(lblCargo)
                         .addGap(18, 18, 18)
                         .addComponent(lblSueldo))
-                    .addComponent(lblImagen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblImagen, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addGap(30, 30, 30))
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        try {
+            // TODO add your handling code here:
+            Reporte reportar = new Reporte();
+            reportar.ReporteEmpleado();
+        } catch (JRException ex) {
+            Logger.getLogger(Usuario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
